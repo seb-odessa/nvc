@@ -1,0 +1,3 @@
+unzip -p /home/seb/workspace/librusec_local_fb2.zip | cut -f 1 -d ','
+
+unzip -p /home/seb/workspace/librusec_local_fb2.zip | tr -s "\4" "\t" | cut -f 3
