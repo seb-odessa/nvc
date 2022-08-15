@@ -1,38 +1,43 @@
-extern crate ncurses;
+use std::io;
+use std::io::Write;
+use std::thread;
+use std::time;
 
-use ncurses::*;
-use std::char;
+use termion;
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
 
 fn main() {
-    /* Setup ncurses. */
-    initscr();
-    raw();
+    // Set terminal to raw mode to allow reading stdin one key at a time
+    let mut stdout = io::stdout().into_raw_mode().unwrap();
 
-    /* Allow for extended keyboard (like F1). */
-    keypad(stdscr(), true);
-    noecho();
-
-    /* Prompt for a character. */
-    addstr("Enter a character: ");
+    // Use asynchronous stdin
+    let mut stdin = termion::async_stdin().keys();
 
     loop {
-        /* Wait for input. */
-        let ch = getch();
-        if ch == KEY_F(1) {
-            /* Enable attributes and output message. */
-            addstr("\nF1");
-            addstr(" pressed");
-        } else {
-            /* Enable attributes and output message. */
-            addstr("\nKey pressed: ");
-            addstr(format!("{}\n", char::from_u32(ch as u32).expect("Invalid char")).as_ref());
+        // Read input (if any)
+        let input = stdin.next();
+
+        // If a key was pressed
+        if let Some(Ok(key)) = input {
+            match key {
+                // Exit if 'q' is pressed
+                termion::event::Key::Char('q') => break,
+                // Else print the pressed key
+                _ => {
+                    write!(
+                        stdout,
+                        "{}{}Key pressed: {:?}",
+                        termion::clear::All,
+                        termion::cursor::Goto(1, 1),
+                        key
+                    )
+                    .unwrap();
+
+                    stdout.lock().flush().unwrap();
+                }
+            }
         }
-
-        /* Refresh, showing the previous message. */
-        refresh();
+        thread::sleep(time::Duration::from_millis(50));
     }
-
-    /* Wait for one more character before exiting. */
-    getch();
-    endwin();
 }
