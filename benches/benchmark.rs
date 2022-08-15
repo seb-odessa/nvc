@@ -1,5 +1,8 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use lib::Nvc;
+
+use lib::HashMapNvc;
+use lib::NextValidCharacter;
+
 use std::collections::HashSet;
 use std::io::{self, BufRead};
 
@@ -18,18 +21,10 @@ fn read_lines(filename: &str) -> io::Result<Vec<String>> {
     return Ok(lines);
 }
 
-fn build_nvc(lines: &Vec<String>) -> Nvc {
-    let mut nvc = Nvc::new();
+fn build_nvc(lines: &Vec<String>) -> HashMapNvc {
+    let mut nvc = HashMapNvc::new();
     for line in lines {
-        nvc.insert(&line);
-    }
-    return nvc;
-}
-
-fn build_filtered((lines, allowed): (&Vec<String>, &HashSet<char>)) -> Nvc {
-    let mut nvc = Nvc::new();
-    for line in lines {
-        nvc.insert_filtered(&line, &allowed);
+        nvc.parse(&line);
     }
     return nvc;
 }
@@ -60,9 +55,6 @@ fn criterion_benchmark(c: &mut Criterion) {
     }
 
     c.bench_function("Build NVC", |b| b.iter(|| build_nvc(black_box(&lines))));
-    c.bench_function("Build NVC Filtered", |b| {
-        b.iter(|| build_filtered(black_box((&lines, &allowed))))
-    });
 }
 
 criterion_group!(benches, criterion_benchmark);
