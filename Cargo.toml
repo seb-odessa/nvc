@@ -15,4 +15,6 @@ path = "src/demo.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-    ncurses = "5.101.0"
+#    ncurses = { version = "5.101", features = ["wide"] }
+#    async-std = { version = "1.12", features = ["main"] }
+    termion = "1"
