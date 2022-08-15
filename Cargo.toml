@@ -7,6 +7,12 @@ edition = "2021"
 name = "lib"
 path = "src/lib/lib.rs"
 
+[[bin]]
+name = "demo_nvc"
+path = "src/demo.rs"
+
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dev-dependencies]
+[dependencies]
+    ncurses = "5.101.0"
