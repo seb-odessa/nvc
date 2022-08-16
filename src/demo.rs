@@ -14,7 +14,7 @@ use lib::NextValidCharacter;
 fn main() -> io::Result<()> {
     let mut nvc = HashMapNvc::new();
     println!("NVC building start.");
-    for line in read_lines("./data/names.txt")? {
+    for line in read_lines("./data/ru_titles.txt")? {
         nvc.parse(&line);
     }
     println!("NVC building complete.");
@@ -26,23 +26,19 @@ fn main() -> io::Result<()> {
     loop {
         let chars = nvc.next(&path);
 
-        let msg = chars
+        let variants = chars
             .into_iter()
-            .flat_map(|c| [c, ' '])
-            // .take(path.len() * 2 - 1)
+            .flat_map(|c| path.chars().chain(vec![c, '\r', '\n'].into_iter()))
+            .chain(path.chars())
             .collect::<String>();
 
         write!(
             stdout,
-            "{}{}{}",
+            "{}{}{variants}",
             termion::clear::All,
             termion::cursor::Goto(1, 1),
-            msg
         )
         .unwrap();
-
-        write!(stdout, "{}>{path}", termion::cursor::Left(1)).unwrap();
-
         stdout.lock().flush().unwrap();
 
         let input = stdin.next();
@@ -51,7 +47,7 @@ fn main() -> io::Result<()> {
                 termion::event::Key::Esc => break,
                 termion::event::Key::Backspace => {
                     if !path.is_empty() {
-                        path.truncate(path.len() - 1);
+                        path.pop().unwrap();
                     }
                 }
                 termion::event::Key::Char(ch) => {
